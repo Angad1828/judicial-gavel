@@ -1,24 +1,41 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { CinematicIntro } from "@/components/intro/CinematicIntro";
+import { LoginPanel } from "@/components/auth/LoginPanel";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Legal Eye — Legal Records & Case Intelligence" },
+      {
+        name: "description",
+        content:
+          "Legal Eye is a legal records platform for cases, court histories and case intelligence — summaries, issues and timelines drawn from the record.",
+      },
+      { property: "og:title", content: "Legal Eye — Legal Records & Case Intelligence" },
+      {
+        property: "og:description",
+        content:
+          "A premium legal records archive with an intelligence layer over cases, histories and court documents.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Entry,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Entry() {
+  const [introDone, setIntroDone] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // The intro is a client-side cinematic; skip it during SSR/prerender.
+  useEffect(() => setMounted(true), []);
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <>
+      <LoginPanel />
+      {mounted && !introDone && <CinematicIntro onComplete={() => setIntroDone(true)} />}
+    </>
   );
 }
