@@ -30,6 +30,12 @@ export interface CaseRecord {
   summary: string;
   issues: string[];
   authorities: string[];
+  /** Restricted matter — shown with the confidential treatment across the app. */
+  confidential?: boolean;
+  /** Quick-access matters, surfaced in the sidebar. */
+  pinned?: boolean;
+  /** Completed matters retained for reference. Not deleted. */
+  archived?: boolean;
 }
 
 export const CASES: CaseRecord[] = [
