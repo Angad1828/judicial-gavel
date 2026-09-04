@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import courtroom from "@/assets/courtroom.jpg";
 import gavelImg from "@/assets/gavel.png";
 import blockImg from "@/assets/block.png";
-import { TIMELINE, type IntroPhase } from "@/lib/intro-timeline";
+import { GAVEL_ANIM_MS, TIMELINE, type IntroPhase } from "@/lib/intro-timeline";
 import { playGavelThud } from "@/lib/gavel-sound";
 import { LegalEyeMark } from "@/components/brand/LegalEyeMark";
 
@@ -36,18 +36,14 @@ export function CinematicIntro({ onComplete }: { onComplete: () => void }) {
       return () => window.clearTimeout(t);
     }
 
+    // The gavel runs one continuous keyframe animation; the phase timers only
+    // mark the beats — impacts fire exactly on the animation's contact frames.
     const timers = ORDER.map(([next, at]) =>
       window.setTimeout(() => {
         setPhase(next);
         if (next === "strike-one" || next === "strike-two") {
-          // sound fires at contact, not at swing start
-          window.setTimeout(
-            () => {
-              playGavelThud(next === "strike-two" ? 1 : 0.82);
-              setImpact((n) => n + 1);
-            },
-            next === "strike-two" ? 300 : 340,
-          );
+          playGavelThud(next === "strike-two" ? 1 : 0.82);
+          setImpact((n) => n + 1);
         }
         if (next === "done") complete.current();
       }, at),
@@ -55,7 +51,7 @@ export function CinematicIntro({ onComplete }: { onComplete: () => void }) {
     return () => timers.forEach(window.clearTimeout);
   }, [reduced]);
 
-  const struck = phase === "strike-one" || phase === "strike-two";
+  const gavelIn = phase !== "dark" && phase !== "haze";
   const brandVisible = phase === "brand" || phase === "settle" || phase === "done";
   const receding = phase === "settle" || phase === "done";
 
@@ -97,17 +93,19 @@ export function CinematicIntro({ onComplete }: { onComplete: () => void }) {
         <div
           className="absolute left-1/2 top-1/2 w-[min(78vw,640px)] -translate-x-1/2 -translate-y-1/2"
           style={{
-            opacity: phase === "dark" || phase === "haze" ? 0 : receding ? 0 : 1,
-            transform: `translate(-50%, -50%) scale(${receding ? 0.94 : struck ? 1 : 0.97})`,
-            transition: "opacity 900ms ease, transform 900ms cubic-bezier(0.22,1,0.36,1)",
+            opacity: gavelIn && !receding ? 1 : 0,
+            transform: `translate(-50%, -50%) scale(${receding ? 0.94 : 1})`,
+            transition: "opacity 400ms ease, transform 900ms cubic-bezier(0.22,1,0.36,1)",
           }}
         >
+          {/* warm pool of light grounding the scene */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_46%_78%,color-mix(in_oklab,var(--brass)_16%,transparent),transparent_62%)]" />
           <div className="relative aspect-[4/3]">
             {/* contact shadow */}
             <div
               className="absolute bottom-[16%] left-[26%] h-[6%] w-[34%] rounded-[50%] bg-black/70 blur-xl"
               style={{
-                transform: `scaleX(${struck ? 1.15 : 1})`,
+                transform: `scaleX(${impact ? 1.15 : 1})`,
                 transition: "transform 220ms ease",
               }}
             />
@@ -117,16 +115,20 @@ export function CinematicIntro({ onComplete }: { onComplete: () => void }) {
               width={768}
               height={512}
               className="absolute bottom-[8%] left-[20%] w-[36%] drop-shadow-[0_18px_28px_rgba(0,0,0,0.6)]"
+              style={impact ? { animation: "block-recoil 260ms ease-out" } : undefined}
+              key={`block-${impact}`}
             />
-            {/* gavel pivots around the hand position at the top of the handle */}
+            {/* The original choreography: one continuous keyframe animation,
+                rotating about the pivot at the handle end so the head arcs
+                down onto the plate — appear → raise → strike ×2 → rebound. */}
             <div
               className="absolute inset-0"
               style={{
                 transformOrigin: "78% 22%",
-                transform: `rotate(${struck ? 4 : -26}deg)`,
-                transition: struck
-                  ? "transform 300ms cubic-bezier(0.55,0,0.9,0.35)"
-                  : "transform 620ms cubic-bezier(0.16,0.9,0.3,1)",
+                animation: gavelIn
+                  ? `gavel-strike ${GAVEL_ANIM_MS}ms linear both`
+                  : undefined,
+                transform: gavelIn ? undefined : "rotate(-30deg)",
               }}
             >
               <img
