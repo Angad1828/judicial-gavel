@@ -5,8 +5,17 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * LEGAL EYE design system.
- * Ink, parchment and brass. No blue-dominant AI palette.
+ * ============================================================
+ * LEGAL EYE — DESIGN SYSTEM
+ * ============================================================
+ *
+ * Ink, parchment, brass, burgundy and restrained olive.
+ *
+ * IMPORTANT:
+ * This stylesheet intentionally avoids the generic
+ * blue/purple AI-SaaS visual language.
+ *
+ * ============================================================
  */
 
 @theme inline {
@@ -15,89 +24,137 @@
   --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
+
   --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
   --font-sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
   --color-brass: var(--brass);
   --color-brass-dim: var(--brass-dim);
+
   --color-parchment: var(--parchment);
   --color-ink: var(--ink);
+
   --color-burgundy: var(--burgundy);
   --color-olive: var(--olive);
+
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
 }
+
+
+/* ============================================================
+   ROOT DESIGN TOKENS
+   ============================================================ */
 
 :root {
   --radius: 0.25rem;
 
   --ink: oklch(0.16 0.011 60);
   --parchment: oklch(0.94 0.014 85);
+
   --brass: oklch(0.74 0.09 82);
   --brass-dim: oklch(0.55 0.06 80);
+
   --burgundy: oklch(0.42 0.09 20);
   --olive: oklch(0.52 0.05 130);
 
   --background: oklch(0.155 0.009 60);
   --foreground: oklch(0.93 0.012 85);
+
   --surface: oklch(0.19 0.011 62);
   --surface-raised: oklch(0.225 0.012 64);
+
   --card: oklch(0.19 0.011 62);
   --card-foreground: oklch(0.93 0.012 85);
+
   --popover: oklch(0.2 0.011 62);
   --popover-foreground: oklch(0.93 0.012 85);
+
   --primary: oklch(0.74 0.09 82);
   --primary-foreground: oklch(0.16 0.011 60);
+
   --secondary: oklch(0.245 0.012 64);
   --secondary-foreground: oklch(0.9 0.012 85);
+
   --muted: oklch(0.24 0.01 62);
   --muted-foreground: oklch(0.68 0.014 78);
+
   --accent: oklch(0.28 0.02 70);
   --accent-foreground: oklch(0.93 0.012 85);
+
   --destructive: oklch(0.48 0.13 22);
   --destructive-foreground: oklch(0.95 0.01 85);
+
   --border: oklch(0.3 0.012 66);
   --input: oklch(0.28 0.012 66);
   --ring: oklch(0.62 0.07 82);
 
-  --shadow-chamber: 0 24px 60px -24px oklch(0 0 0 / 0.75);
-  --rule-brass: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in oklab, var(--brass) 60%, transparent),
-    transparent
-  );
+  --shadow-chamber:
+    0 24px 60px -24px oklch(0 0 0 / 0.75);
+
+  --rule-brass:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklab, var(--brass) 60%, transparent),
+      transparent
+    );
 }
+
+
+/* ============================================================
+   BASE
+   ============================================================ */
 
 @layer base {
   * {
     border-color: var(--color-border);
   }
 
+  html {
+    background: var(--color-background);
+  }
+
   body {
+    margin: 0;
+    min-width: 320px;
+
     background-color: var(--color-background);
     color: var(--color-foreground);
+
     font-family: var(--font-sans);
+
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1,
@@ -108,12 +165,27 @@
     letter-spacing: -0.01em;
   }
 
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
   ::selection {
-    background: color-mix(in oklab, var(--brass) 35%, transparent);
+    background: color-mix(
+      in oklab,
+      var(--brass) 35%,
+      transparent
+    );
   }
 }
 
-/* Fine uppercase legal label */
+
+/* ============================================================
+   LEGAL LABEL
+   ============================================================ */
+
 @utility label-legal {
   font-size: 0.6875rem;
   letter-spacing: 0.18em;
@@ -122,241 +194,990 @@
   font-weight: 500;
 }
 
-/* Hairline brass divider */
+
+/* ============================================================
+   BRASS HAIRLINE
+   ============================================================ */
+
 @utility rule-brass {
   height: 1px;
   background: var(--rule-brass);
 }
 
-/* Paper grain overlay for cinematic surfaces */
+
+/* ============================================================
+   PAPER / FILM GRAIN
+   ============================================================ */
+
 @utility grain {
   position: relative;
+
   &::after {
     content: "";
+
     position: absolute;
     inset: 0;
+
     pointer-events: none;
+
     opacity: 0.35;
+
     mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   }
 }
 
+
+/* ============================================================
+   CHAMBER PANEL
+   ============================================================ */
+
 @utility chamber-panel {
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--surface-raised) 92%, transparent),
-    var(--surface)
-  );
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(
+        in oklab,
+        var(--surface-raised) 92%,
+        transparent
+      ),
+      var(--surface)
+    );
+
   border: 1px solid var(--border);
+
   box-shadow: var(--shadow-chamber);
 }
 
+
+/* ============================================================
+   LEGAL FOCUS
+   ============================================================ */
+
 @utility focus-legal {
   &:focus-visible {
-    outline: 2px solid color-mix(in oklab, var(--brass) 70%, transparent);
+    outline:
+      2px solid
+      color-mix(
+        in oklab,
+        var(--brass) 70%,
+        transparent
+      );
+
     outline-offset: 2px;
   }
 }
 
-/* ---------- Cinematic intro choreography ---------- */
+
+/* ============================================================
+   ============================================================
+   CINEMATIC INTRO
+   ============================================================
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   COURTROOM ATMOSPHERE
+   ------------------------------------------------------------ */
 
 @keyframes haze-drift {
   0% {
-    transform: scale(1.14) translate3d(0, 0, 0);
+    transform:
+      scale(1.14)
+      translate3d(0, 0, 0);
   }
+
   100% {
-    transform: scale(1.04) translate3d(-1.5%, -1%, 0);
+    transform:
+      scale(1.04)
+      translate3d(-1.5%, -1%, 0);
   }
 }
+
+
+/* ------------------------------------------------------------
+   CAMERA IMPACT
+   ------------------------------------------------------------ */
 
 @keyframes shake-impact {
   0% {
     transform: translate3d(0, 0, 0);
   }
+
+  12% {
+    transform: translate3d(0, 4px, 0);
+  }
+
   18% {
-    transform: translate3d(0, 7px, 0) scale(1.006);
+    transform:
+      translate3d(0, 7px, 0)
+      scale(1.006);
   }
-  38% {
-    transform: translate3d(-3px, -3px, 0);
+
+  32% {
+    transform: translate3d(-2px, -2px, 0);
   }
-  62% {
+
+  48% {
     transform: translate3d(2px, 2px, 0);
   }
+
+  68% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
   100% {
     transform: translate3d(0, 0, 0);
   }
 }
 
+
+/* ------------------------------------------------------------
+   IMPACT LIGHT
+   ------------------------------------------------------------ */
+
 @keyframes bloom-pulse {
   0% {
     opacity: 0;
-    transform: scale(0.6);
+    transform: scale(0.55);
   }
-  22% {
-    opacity: 0.75;
-    transform: scale(1);
+
+  18% {
+    opacity: 0.8;
+    transform: scale(0.88);
   }
+
+  34% {
+    opacity: 0.55;
+    transform: scale(1.08);
+  }
+
   100% {
     opacity: 0;
-    transform: scale(1.7);
+    transform: scale(1.75);
   }
 }
+
+
+/* ------------------------------------------------------------
+   DUST / IMPACT PARTICLES
+   ------------------------------------------------------------ */
 
 @keyframes dust-rise {
   0% {
     opacity: 0;
-    transform: translate3d(0, 0, 0) scale(0.4);
+    transform:
+      translate3d(0, 0, 0)
+      scale(0.35);
   }
-  25% {
+
+  20% {
     opacity: 0.5;
   }
+
+  55% {
+    opacity: 0.28;
+  }
+
   100% {
     opacity: 0;
-    transform: translate3d(var(--dx, 0), -60px, 0) scale(1);
+    transform:
+      translate3d(var(--dx, 0), -60px, 0)
+      scale(1);
   }
 }
 
+
+/* ------------------------------------------------------------
+   BRAND SHEEN
+   ------------------------------------------------------------ */
+
 @keyframes sheen-sweep {
   0% {
-    transform: translateX(-130%) skewX(-16deg);
+    transform:
+      translateX(-130%)
+      skewX(-16deg);
+
     opacity: 0;
   }
+
   25% {
     opacity: 0.85;
   }
+
   100% {
-    transform: translateX(160%) skewX(-16deg);
+    transform:
+      translateX(160%)
+      skewX(-16deg);
+
     opacity: 0;
   }
 }
+
+
+/* ------------------------------------------------------------
+   GENERIC RISE
+   ------------------------------------------------------------ */
 
 @keyframes rise-in {
   0% {
     opacity: 0;
-    transform: translate3d(0, 14px, 0);
+
+    transform:
+      translate3d(0, 14px, 0);
   }
+
   100% {
     opacity: 1;
+
     transform: none;
   }
 }
 
 @utility animate-rise-in {
-  animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation:
+    rise-in
+    0.9s
+    cubic-bezier(0.22, 1, 0.36, 1)
+    both;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-  }
-}
 
-/* ---------- Restored gavel choreography ----------
-   One continuous strike animation: appear raised → settle into stance →
-   wind-up → STRIKE 1 → lift → STRIKE 2 → rebound and rest.
-   Impact frames (41.07% / 63.57%) must stay in sync with intro-timeline.ts. */
+/* ============================================================
+   ============================================================
+   RESTORED GAVEL CHOREOGRAPHY
+   ============================================================
+   ============================================================
+
+   IMPORTANT VISUAL DECISION
+   -------------------------
+
+   The source gavel.png is naturally diagonal:
+
+          HANDLE
+             /
+            /
+           /
+       HEAD
+
+   The image itself is therefore corrected with a fixed
+   +40deg rotation so that the RESTING visual orientation
+   becomes:
+
+       HEAD ───────────────── HANDLE
+        LEFT                     RIGHT
+
+   The actual strike is then controlled by the parent
+   wrapper.
+
+   This prevents the previous problem where:
+   
+       source-image rotation
+                 +
+       animation rotation
+
+   combined into an exaggerated diagonal swinging motion.
+
+   The gavel now behaves primarily as a controlled vertical
+   courtroom striking motion.
+
+   TIMING:
+   ------------------------------------------------------------
+   Gavel animation starts at 900ms.
+   First impact = 2050ms.
+   Second impact = 2680ms.
+
+   Since GAVEL_ANIM_MS = 2800ms:
+
+   First impact:
+   (2050 - 900) / 2800 = 41.07%
+
+   Second impact:
+   (2680 - 900) / 2800 = 63.57%
+
+   DO NOT CHANGE THESE TWO PERCENTAGES without also
+   changing intro-timeline.ts.
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   GAVEL MOVEMENT
+   ------------------------------------------------------------ */
 
 @keyframes gavel-strike {
+
+  /*
+   * ----------------------------------------------------------
+   * 0%
+   * Initial controlled position.
+   *
+   * The gavel is horizontally readable.
+   * Head = LEFT
+   * Handle = RIGHT
+   * ----------------------------------------------------------
+   */
   0% {
-    transform: rotate(-30deg);
-    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    transform:
+      translate3d(0, 0, 0)
+      rotate(0deg);
+
+    animation-timing-function:
+      cubic-bezier(0.22, 1, 0.36, 1);
   }
-  19.6% {
-    transform: rotate(-22deg);
-    animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+
+
+  /*
+   * ----------------------------------------------------------
+   * 12%
+   * Small settling motion.
+   * ----------------------------------------------------------
+   */
+  12% {
+    transform:
+      translate3d(0, 0, 0)
+      rotate(0deg);
+
+    animation-timing-function:
+      cubic-bezier(0.4, 0, 0.2, 1);
   }
-  28% {
-    transform: rotate(-34deg);
-    animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.35);
+
+
+  /*
+   * ----------------------------------------------------------
+   * 23%
+   * FIRST WIND-UP
+   *
+   * The entire gavel rises slightly.
+   *
+   * Very small positive rotation:
+   * the head lifts naturally while the handle remains
+   * toward the right.
+   *
+   * No spinning.
+   * ----------------------------------------------------------
+   */
+  23% {
+    transform:
+      translate3d(0, -42px, 0)
+      rotate(7deg);
+
+    animation-timing-function:
+      cubic-bezier(0.45, 0, 0.8, 0.35);
   }
+
+
+  /*
+   * ----------------------------------------------------------
+   * 32%
+   * ANTICIPATION
+   *
+   * Brief hold before the strike.
+   * ----------------------------------------------------------
+   */
+  32% {
+    transform:
+      translate3d(0, -43px, 0)
+      rotate(7deg);
+
+    animation-timing-function:
+      cubic-bezier(0.12, 0.75, 0.25, 1);
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * 41.07%
+   *
+   * EXACT FIRST IMPACT
+   *
+   * This MUST remain synchronized with:
+   *
+   * TIMELINE.strikeOne
+   *
+   * in intro-timeline.ts.
+   * ----------------------------------------------------------
+   */
   41.07% {
-    transform: rotate(3deg);
-    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+    transform:
+      translate3d(0, 7px, 0)
+      rotate(-5deg);
+
+    animation-timing-function:
+      cubic-bezier(0.12, 0.72, 0.2, 1);
   }
-  46% {
-    transform: rotate(-7deg);
-    animation-timing-function: cubic-bezier(0.3, 0.7, 0.4, 1);
+
+
+  /*
+   * ----------------------------------------------------------
+   * 45%
+   * FIRST REBOUND
+   *
+   * Much smaller than the strike.
+   * ----------------------------------------------------------
+   */
+  45% {
+    transform:
+      translate3d(0, -9px, 0)
+      rotate(2deg);
+
+    animation-timing-function:
+      cubic-bezier(0.3, 0.7, 0.4, 1);
   }
-  54% {
-    transform: rotate(-26deg);
-    animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.35);
+
+
+  /*
+   * ----------------------------------------------------------
+   * 50%
+   * RESET
+   * ----------------------------------------------------------
+   */
+  50% {
+    transform:
+      translate3d(0, 0, 0)
+      rotate(0deg);
+
+    animation-timing-function:
+      cubic-bezier(0.45, 0, 0.2, 1);
   }
+
+
+  /*
+   * ----------------------------------------------------------
+   * 55%
+   * SECOND WIND-UP
+   *
+   * Slightly stronger than strike one.
+   * ----------------------------------------------------------
+   */
+  55% {
+    transform:
+      translate3d(0, -48px, 0)
+      rotate(8deg);
+
+    animation-timing-function:
+      cubic-bezier(0.45, 0, 0.82, 0.32);
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * 59%
+   * SECOND ANTICIPATION
+   * ----------------------------------------------------------
+   */
+  59% {
+    transform:
+      translate3d(0, -48px, 0)
+      rotate(8deg);
+
+    animation-timing-function:
+      cubic-bezier(0.12, 0.75, 0.25, 1);
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * 63.57%
+   *
+   * EXACT SECOND IMPACT
+   *
+   * This MUST remain synchronized with:
+   *
+   * TIMELINE.strikeTwo
+   * ----------------------------------------------------------
+   */
   63.57% {
-    transform: rotate(5deg);
-    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+    transform:
+      translate3d(0, 8px, 0)
+      rotate(-5deg);
+
+    animation-timing-function:
+      cubic-bezier(0.1, 0.72, 0.2, 1);
   }
-  69% {
-    transform: rotate(-5deg);
-    animation-timing-function: cubic-bezier(0.3, 0.8, 0.4, 1);
+
+
+  /*
+   * ----------------------------------------------------------
+   * 68%
+   * SECOND REBOUND
+   * ----------------------------------------------------------
+   */
+  68% {
+    transform:
+      translate3d(0, -8px, 0)
+      rotate(2deg);
+
+    animation-timing-function:
+      cubic-bezier(0.3, 0.7, 0.4, 1);
   }
-  78% {
-    transform: rotate(-1deg);
+
+
+  /*
+   * ----------------------------------------------------------
+   * 75%
+   * SETTLE
+   * ----------------------------------------------------------
+   */
+  75% {
+    transform:
+      translate3d(0, 0, 0)
+      rotate(0deg);
+
+    animation-timing-function:
+      cubic-bezier(0.22, 1, 0.36, 1);
   }
+
+
+  /*
+   * ----------------------------------------------------------
+   * 82%
+   * Final resting position.
+   * ----------------------------------------------------------
+   */
+  82% {
+    transform:
+      translate3d(0, 0, 0)
+      rotate(0deg);
+  }
+
+
   100% {
-    transform: rotate(-1deg);
+    transform:
+      translate3d(0, 0, 0)
+      rotate(0deg);
   }
 }
+
+
+/* ============================================================
+   GAVEL IMAGE ORIENTATION
+   ============================================================
+
+   The actual supplied PNG is diagonal.
+
+   We rotate the IMAGE ONCE by +40deg.
+
+   This transforms the original:
+
+          /
+         /
+        /
+
+   into approximately:
+
+   ─────────────────
+
+   with the hammer head on the LEFT and handle on the RIGHT.
+
+   The parent animation above handles the actual slam.
+
+   This separation is extremely important.
+   ============================================================ */
+
+img[width="1024"][height="1024"] {
+  transform:
+    rotate(40deg)
+    scale(0.96);
+
+  transform-origin: center center;
+
+  will-change: transform;
+
+  /*
+   * Keep the source image visually crisp.
+   */
+  backface-visibility: hidden;
+}
+
+
+/* ============================================================
+   GAVEL STAGE POSITIONING
+   ============================================================
+
+   The actual stage is created by CinematicIntro.tsx using:
+
+   w-[min(78vw,640px)]
+   aspect-[4/3]
+
+   We intentionally keep the stage lower than the center
+   branding zone.
+
+   This means the gavel remains prominent without occupying
+   the exact center where LEGAL EYE appears.
+   ============================================================ */
+
+.relative.aspect-\[4\/3\] {
+  position: relative;
+
+  /*
+   * Prevent transformed gavel pixels from unexpectedly
+   * affecting the layout.
+   */
+  isolation: isolate;
+}
+
+
+/* ============================================================
+   GAVEL DROP SHADOW
+   ============================================================ */
+
+img[width="1024"][height="1024"] {
+  filter:
+    drop-shadow(
+      0 28px 34px rgba(0, 0, 0, 0.48)
+    );
+
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+
+/* ============================================================
+   SOUND BLOCK
+   ============================================================ */
 
 @keyframes block-recoil {
+
   0% {
-    transform: translateY(0) scaleY(1);
+    transform:
+      translate3d(0, 0, 0)
+      scaleY(1);
   }
-  30% {
-    transform: translateY(2px) scaleY(0.985);
+
+  8% {
+    transform:
+      translate3d(0, 3px, 0)
+      scaleY(0.975);
   }
+
+  18% {
+    transform:
+      translate3d(0, 1px, 0)
+      scaleY(0.99);
+  }
+
+  38% {
+    transform:
+      translate3d(0, 0, 0)
+      scaleY(1);
+  }
+
   100% {
-    transform: translateY(0) scaleY(1);
+    transform:
+      translate3d(0, 0, 0)
+      scaleY(1);
   }
 }
 
-/* ---------- Case archive surfaces ---------- */
+
+/* ============================================================
+   IMPACT LIGHT
+   ============================================================ */
+
+.gavel-impact-light {
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   CENTER BRAND PROTECTION
+   ============================================================
+
+   The Legal Eye wordmark is intentionally placed above the
+   gavel visual layer.
+
+   This prevents the gavel from visually "cutting through"
+   the typography.
+
+   The brand is the hero identity.
+   The gavel is the cinematic foreground action.
+   ============================================================ */
+
+
+/*
+ * The brand reveal is the final positioned full-screen
+ * centered layer in CinematicIntro.tsx.
+ *
+ * Give it a higher stacking context.
+ */
+.absolute.inset-x-0.top-1\/2 {
+  z-index: 60;
+
+  /*
+   * Prevent the brand layer from interfering with the
+   * gavel animation itself.
+   */
+  pointer-events: none;
+}
+
+
+/* ------------------------------------------------------------
+   Brand typography
+   ------------------------------------------------------------ */
+
+.absolute.inset-x-0.top-1\/2 h1 {
+  position: relative;
+
+  z-index: 62;
+
+  text-shadow:
+    0 2px 24px rgba(0, 0, 0, 0.42);
+}
+
+
+/* ------------------------------------------------------------
+   Brand icon
+   ------------------------------------------------------------ */
+
+.absolute.inset-x-0.top-1\/2 svg {
+  position: relative;
+
+  z-index: 62;
+
+  filter:
+    drop-shadow(
+      0 4px 18px
+      color-mix(
+        in oklab,
+        var(--brass) 18%,
+        transparent
+      )
+    );
+}
+
+
+/* ============================================================
+   COURTROOM LAYER
+   ============================================================
+
+   Keep courtroom atmospheric and behind the gavel/brand.
+   ============================================================ */
+
+.fixed.inset-0.z-50 > div:first-child {
+  z-index: 1;
+}
+
+
+/*
+ * Camera-shake wrapper.
+ *
+ * Keep above courtroom.
+ */
+.fixed.inset-0.z-50 > div:nth-child(2) {
+  z-index: 10;
+}
+
+
+/*
+ * Gavel stage itself.
+ */
+.fixed.inset-0.z-50
+  > div:nth-child(2)
+  > div:first-child {
+  z-index: 20;
+}
+
+
+/*
+ * Brand remains above the gavel.
+ */
+.fixed.inset-0.z-50
+  > div:nth-child(2)
+  > div:last-child {
+  z-index: 60;
+}
+
+
+/* ============================================================
+   CASE ARCHIVE SURFACES
+   ============================================================ */
 
 @utility case-card {
   position: relative;
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--surface-raised) 70%, transparent),
-    var(--surface)
-  );
+
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(
+        in oklab,
+        var(--surface-raised) 70%,
+        transparent
+      ),
+      var(--surface)
+    );
+
   border: 1px solid var(--border);
+
   transition:
     transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
     border-color 260ms ease,
     box-shadow 260ms ease;
+
   &:hover {
     transform: translateY(-3px);
-    border-color: color-mix(in oklab, var(--brass) 45%, var(--border));
-    box-shadow: 0 18px 40px -26px oklch(0 0 0 / 0.9);
+
+    border-color:
+      color-mix(
+        in oklab,
+        var(--brass) 45%,
+        var(--border)
+      );
+
+    box-shadow:
+      0 18px 40px -26px
+      oklch(0 0 0 / 0.9);
   }
 }
 
-/* Restricted matter — confidentiality, not danger. */
+
+/* ============================================================
+   CONFIDENTIAL CASE
+   ============================================================ */
+
 @utility case-card-confidential {
-  border-color: color-mix(in oklab, var(--burgundy) 55%, var(--border));
+  border-color:
+    color-mix(
+      in oklab,
+      var(--burgundy) 55%,
+      var(--border)
+    );
+
   background:
     linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--burgundy) 9%, var(--surface-raised)),
+      18deg,
+      color-mix(
+        in oklab,
+        var(--burgundy) 9%,
+        var(--surface-raised)
+      ),
       var(--surface)
     );
+
   &:hover {
-    border-color: color-mix(in oklab, var(--burgundy) 80%, transparent);
+    border-color:
+      color-mix(
+        in oklab,
+        var(--burgundy) 80%,
+        transparent
+      );
   }
 }
+
+
+/* ============================================================
+   CONFIDENTIAL SEAL
+   ============================================================ */
 
 @utility seal-confidential {
   display: inline-flex;
+
   align-items: center;
   gap: 0.35rem;
-  border: 1px solid color-mix(in oklab, var(--burgundy) 65%, transparent);
-  color: color-mix(in oklab, var(--burgundy) 62%, var(--parchment));
-  padding: 0.125rem 0.45rem;
+
+  border:
+    1px solid
+    color-mix(
+      in oklab,
+      var(--burgundy) 65%,
+      transparent
+    );
+
+  color:
+    color-mix(
+      in oklab,
+      var(--burgundy) 62%,
+      var(--parchment)
+    );
+
+  padding:
+    0.125rem
+    0.45rem;
+
   font-size: 0.625rem;
+
   letter-spacing: 0.14em;
+
   text-transform: uppercase;
+}
+
+
+/* ============================================================
+   RESPONSIVE GAVEL
+   ============================================================ */
+
+@media (max-width: 1100px) {
+
+  /*
+   * Keep the gavel prominent but reduce its visual footprint
+   * as the available horizontal space decreases.
+   */
+  img[width="1024"][height="1024"] {
+    transform:
+      rotate(40deg)
+      scale(0.9);
+  }
+}
+
+
+@media (max-width: 700px) {
+
+  /*
+   * On mobile, the gavel remains horizontal in its
+   * resting visual orientation but becomes more compact.
+   */
+  img[width="1024"][height="1024"] {
+    transform:
+      rotate(40deg)
+      scale(0.76);
+  }
+
+  /*
+   * Keep the center branding readable.
+   */
+  .absolute.inset-x-0.top-1\/2 {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
+
+/* ============================================================
+   VERY SMALL SCREENS
+   ============================================================ */
+
+@media (max-width: 420px) {
+
+  img[width="1024"][height="1024"] {
+    transform:
+      rotate(40deg)
+      scale(0.68);
+  }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+
+    animation-iteration-count: 1 !important;
+
+    transition-duration: 0.001ms !important;
+
+    scroll-behavior: auto !important;
+  }
+
+  img[width="1024"][height="1024"] {
+    transform:
+      rotate(40deg)
+      scale(0.96) !important;
+  }
 }
