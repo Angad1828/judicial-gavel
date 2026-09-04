@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronRight, Clock, Landmark, Lock, Pin, Plus, Users } from "lucide-react";
+import { ChevronRight, Clock, Fingerprint, Landmark, Lock, Pin, Plus, Users } from "lucide-react";
 import type { KeyboardEvent } from "react";
 import type { CaseRecord } from "@/data/cases";
-import { STATUS_TONE } from "@/data/cases";
+import { STATUS_TONE, isConfidential } from "@/data/cases";
 import { useCaseActions } from "@/lib/case-store";
 
 function PartyLine({ record }: { record: CaseRecord }) {
@@ -18,7 +18,7 @@ function PartyLine({ record }: { record: CaseRecord }) {
 export function CaseCard({ record }: { record: CaseRecord }) {
   const navigate = useNavigate();
   const { togglePinned } = useCaseActions();
-  const confidential = Boolean(record.confidential);
+  const confidential = isConfidential(record);
 
   function openRecord() {
     navigate({ to: "/records", search: { case: record.id } });
@@ -77,6 +77,21 @@ export function CaseCard({ record }: { record: CaseRecord }) {
           <Landmark className="h-3.5 w-3.5 shrink-0 text-brass-dim" />
           <dd className="truncate">{record.court}</dd>
         </div>
+        {(record.cnr || record.firNo || record.policeStation) && (
+          <div className="flex items-center gap-2">
+            <dt className="sr-only">Case identifiers</dt>
+            <Fingerprint className="h-3.5 w-3.5 shrink-0 text-brass-dim" />
+            <dd className="truncate font-mono text-[11px] text-muted-foreground">
+              {[
+                record.cnr && `CNR ${record.cnr}`,
+                record.firNo && `FIR ${record.firNo}`,
+                record.policeStation,
+              ]
+                .filter(Boolean)
+                .join("  ·  ")}
+            </dd>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <dt className="sr-only">Parties</dt>
           <Users className="h-3.5 w-3.5 shrink-0 text-brass-dim" />

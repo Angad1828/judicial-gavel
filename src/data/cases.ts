@@ -5,6 +5,45 @@
 
 export type CaseStatus = "Active" | "Reserved" | "Disposed" | "Appeal";
 
+/**
+ * Confidentiality classification — independent of the lifecycle status.
+ * A matter's classification and its status are two separate axes.
+ */
+export type CaseClassification = "general" | "confidential";
+
+/** Lifecycle choices offered by the status editor. */
+export const STATUS_OPTIONS: CaseStatus[] = ["Reserved", "Active", "Appeal", "Disposed"];
+
+/** Confidentiality choices offered by the classification editor. */
+export const CLASSIFICATION_OPTIONS: CaseClassification[] = ["general", "confidential"];
+
+export const CLASSIFICATION_LABEL: Record<CaseClassification, string> = {
+  general: "General",
+  confidential: "Confidential",
+};
+
+export function isConfidential(record: Pick<CaseRecord, "classification">) {
+  return record.classification === "confidential";
+}
+
+/** Case-type categories browsable from "The Bar" in the sidebar. */
+export type CaseCategory =
+  | "Criminal"
+  | "Civil"
+  | "Corporate"
+  | "Constitutional"
+  | "Family"
+  | "Property";
+
+export const CASE_CATEGORIES: CaseCategory[] = [
+  "Criminal",
+  "Civil",
+  "Corporate",
+  "Constitutional",
+  "Family",
+  "Property",
+];
+
 /** Tailwind tones for the status label — shared by docket, cards and drawer. */
 export const STATUS_TONE: Record<CaseStatus, string> = {
   Active: "text-olive border-olive/40",
@@ -45,8 +84,16 @@ export interface CaseRecord {
   summary: string;
   issues: string[];
   authorities: string[];
-  /** Restricted matter — shown with the confidential treatment across the app. */
-  confidential?: boolean;
+  /** National unique case number issued under the eCourts CNR scheme. */
+  cnr?: string;
+  /** First Information Report reference (criminal matters). */
+  firNo?: string;
+  /** Police station of record for the FIR (criminal matters). */
+  policeStation?: string;
+  /** Confidentiality classification — restricted matters get the confidential treatment. */
+  classification: CaseClassification;
+  /** Case-type category, browsable from The Bar in the sidebar. */
+  category?: CaseCategory;
   /** Quick-access matters, surfaced in the sidebar. */
   pinned?: boolean;
   /** Completed matters retained for reference. Not deleted. */
@@ -57,12 +104,15 @@ export const CASES: CaseRecord[] = [
   {
     id: "CIV-2024-0417",
     title: "Marwah Textiles Pvt. Ltd. v. Union Bank",
+    cnr: "DLHC01/004173/2024",
     court: "High Court of Delhi",
     bench: "Division Bench II",
     status: "Active",
+    classification: "general",
     filed: "12 Mar 2024",
     updated: "2 days ago",
     pinned: true,
+    category: "Corporate",
     subject: "Commercial · Recovery & Security Interest",
     parties: [
       { role: "Petitioner", name: "Marwah Textiles Pvt. Ltd." },
@@ -87,13 +137,17 @@ export const CASES: CaseRecord[] = [
   {
     id: "CRL-2023-1188",
     title: "State v. Rehman & Others",
+    cnr: "KAHC01/001188/2023",
+    firNo: "428/2023",
+    policeStation: "K.R. Puram Police Station",
     court: "Sessions Court, Bengaluru",
     bench: "Court No. 7",
     status: "Reserved",
+    classification: "confidential",
     filed: "08 Sep 2023",
     updated: "6 days ago",
-    confidential: true,
     pinned: true,
+    category: "Criminal",
     subject: "Criminal · Documentary Evidence",
     parties: [
       { role: "Prosecution", name: "State of Karnataka" },
@@ -118,11 +172,14 @@ export const CASES: CaseRecord[] = [
   {
     id: "CON-2022-0093",
     title: "Nagra v. Municipal Corporation",
+    cnr: "SCL/000093/2022",
     court: "Supreme Court",
     bench: "Bench of Three Judges",
     status: "Appeal",
+    classification: "general",
     filed: "22 Jan 2022",
     updated: "3 weeks ago",
+    category: "Constitutional",
     subject: "Constitutional · Land Acquisition",
     parties: [
       { role: "Appellant", name: "H. Nagra" },
@@ -147,12 +204,15 @@ export const CASES: CaseRecord[] = [
   {
     id: "FAM-2024-0602",
     title: "In re: Estate of D. Kaul",
+    cnr: "MHPC01/006025/2024",
     court: "District Court, Pune",
     bench: "Court No. 3",
     status: "Disposed",
+    classification: "general",
     filed: "30 Apr 2024",
     updated: "5 weeks ago",
     archived: true,
+    category: "Family",
     subject: "Succession · Testamentary",
     parties: [
       { role: "Applicant", name: "R. Kaul" },
@@ -174,10 +234,11 @@ export const CASES: CaseRecord[] = [
     court: "Arbitral Tribunal, Mumbai",
     bench: "Three-member tribunal",
     status: "Active",
+    classification: "confidential",
     filed: "09 Jan 2025",
     updated: "yesterday",
+    category: "Corporate",
     subject: "Arbitration · Concession Agreement",
-    confidential: true,
     parties: [
       { role: "Claimant", name: "Sable Infra LLP" },
       { role: "Respondent", name: "Coastal Port Authority" },
@@ -198,8 +259,10 @@ export const CASES: CaseRecord[] = [
     court: "CESTAT, Chennai",
     bench: "Single Member",
     status: "Disposed",
+    classification: "general",
     filed: "17 Feb 2023",
     updated: "4 months ago",
+    category: "Civil",
     subject: "Indirect Tax · Classification",
     archived: true,
     parties: [
@@ -218,11 +281,14 @@ export const CASES: CaseRecord[] = [
   {
     id: "IPR-2024-0250",
     title: "Aureus Labs v. Kestrel Pharma",
+    cnr: "MHHC01/002504/2024",
     court: "High Court of Bombay",
     bench: "Single Judge (IP Division)",
     status: "Active",
+    classification: "general",
     filed: "22 Aug 2024",
     updated: "9 days ago",
+    category: "Corporate",
     subject: "Intellectual Property · Patent Infringement",
     parties: [
       { role: "Plaintiff", name: "Aureus Labs Pvt. Ltd." },
@@ -238,3 +304,103 @@ export const CASES: CaseRecord[] = [
     authorities: ["F. Hoffmann-La Roche v. Cipla"],
   },
 ];
+
+/**
+ * Structured search over the case archive.
+ *
+ * The dashboard exposes one free-text bar (matches everything via
+ * `caseSearchText`) plus a per-field refinement panel driven by
+ * `caseMatchesFilters`. Roles are split into complainant/defendant sides so
+ * "plaintiff" and "defendant" filters resolve to the correct party names
+ * regardless of the matter's framing (petition, appeal, prosecution…).
+ */
+
+const PLAINTIFF_ROLES = new Set([
+  "Plaintiff",
+  "Petitioner",
+  "Applicant",
+  "Claimant",
+  "Appellant",
+  "Prosecution",
+  "Complainant",
+]);
+
+const DEFENDANT_ROLES = new Set(["Defendant", "Respondent", "Accused", "Caveator"]);
+
+export function plaintiffNames(record: CaseRecord): string[] {
+  return record.parties.filter((p) => PLAINTIFF_ROLES.has(p.role)).map((p) => p.name);
+}
+
+export function defendantNames(record: CaseRecord): string[] {
+  return record.parties.filter((p) => DEFENDANT_ROLES.has(p.role)).map((p) => p.name);
+}
+
+function yearOf(filed: string): string {
+  const match = filed.match(/\b(19|20)\d{2}\b/);
+  return match ? match[0] : "";
+}
+
+export interface CaseSearchFields {
+  /** Case name — matches the matter title. */
+  name: string;
+  /** Case no. / year — matches the archive reference and the filing year. */
+  caseNo: string;
+  /** Plaintiff / complainant side party names. */
+  plaintiff: string;
+  /** Defendant side party names. */
+  defendant: string;
+  /** FIR number (criminal matters). */
+  fir: string;
+  /** Police station of record. */
+  policeStation: string;
+  /** eCourts CNR number. */
+  cnr: string;
+}
+
+export const EMPTY_CASE_SEARCH: CaseSearchFields = {
+  name: "",
+  caseNo: "",
+  plaintiff: "",
+  defendant: "",
+  fir: "",
+  policeStation: "",
+  cnr: "",
+};
+
+/** Every searchable word of a record, for the free-text bar. */
+export function caseSearchText(record: CaseRecord): string {
+  return [
+    record.id,
+    yearOf(record.filed),
+    record.title,
+    record.court,
+    record.bench,
+    record.subject,
+    record.status,
+    ...record.parties.flatMap((p) => [p.name, p.role]),
+    record.cnr ?? "",
+    record.firNo ?? "",
+    record.policeStation ?? "",
+  ]
+    .join(" ")
+    .toLowerCase();
+}
+
+function matchesAny(haystack: string[], needle: string): boolean {
+  const q = needle.trim().toLowerCase();
+  if (!q) return true;
+  return haystack.some((value) => value.toLowerCase().includes(q));
+}
+
+/** AND-combined per-field matching for the refinement panel. */
+export function caseMatchesFilters(record: CaseRecord, filters: CaseSearchFields): boolean {
+  return (
+    matchesAny([record.title], filters.name) &&
+    matchesAny([record.id, yearOf(record.filed)], filters.caseNo) &&
+    matchesAny(plaintiffNames(record), filters.plaintiff) &&
+    matchesAny(defendantNames(record), filters.defendant) &&
+    matchesAny([record.firNo ?? ""], filters.fir) &&
+    matchesAny([record.policeStation ?? ""], filters.policeStation) &&
+    matchesAny([record.cnr ?? ""], filters.cnr)
+  );
+}

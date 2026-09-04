@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { LegalEyeMark } from "@/components/brand/LegalEyeMark";
-import { CURRENT_USER } from "@/lib/case-store";
+import { UserProfileMenu } from "@/components/layout/UserProfileMenu";
 
-export type AppSection = "dashboard" | "records" | "upload";
+export type AppSection = "dashboard" | "records" | "upload" | "profile";
 
 const NAV: Array<{ to: "/dashboard" | "/records" | "/upload"; label: string; section: AppSection }> = [
   { to: "/dashboard", label: "Dashboard", section: "dashboard" },
@@ -24,7 +24,7 @@ export function AppHeader({ current, onMenu }: AppHeaderProps) {
           <button
             type="button"
             onClick={onMenu}
-            aria-label="Open archive drawer with pinned and completed cases"
+            aria-label="Open sidebar — pinned cases, case categories and archive"
             className="focus-legal -ml-1 flex h-9 w-9 items-center justify-center border border-border text-muted-foreground transition-colors hover:border-brass-dim hover:text-parchment"
           >
             <Menu className="h-4 w-4" />
@@ -57,17 +57,8 @@ export function AppHeader({ current, onMenu }: AppHeaderProps) {
           })}
         </nav>
 
-        <div className="ml-auto flex items-center gap-3">
-          <span className="hidden text-right sm:block">
-            <span className="block text-[11px] text-muted-foreground">Signed in as</span>
-            <span className="block text-xs text-parchment">{CURRENT_USER.name}</span>
-          </span>
-          <span
-            className="flex h-9 w-9 items-center justify-center border border-brass-dim font-display text-xs text-brass"
-            title={CURRENT_USER.name}
-          >
-            {CURRENT_USER.initials}
-          </span>
+        <div className="ml-auto">
+          <UserProfileMenu />
         </div>
       </div>
     </header>

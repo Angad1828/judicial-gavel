@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useState, type DragEvent, type KeyboardEvent } from "react";
 import {
   Check,
@@ -11,8 +11,12 @@ import {
 import { format } from "date-fns";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { useCaseActions, useCases, toCaseRecord } from "@/lib/case-store";
+import { getSession } from "@/lib/user-store";
 
 export const Route = createFileRoute("/upload")({
+  beforeLoad: () => {
+    if (!getSession()) throw redirect({ to: "/" });
+  },
   head: () => ({
     meta: [
       { title: "Upload Case File — Legal Eye" },
@@ -101,7 +105,7 @@ function UploadCase() {
       petitioner,
       respondent,
       summary: `${cleanTitle} — entered into the archive${file ? ` with ${file.name}` : ""}.`,
-      confidential,
+      classification: confidential ? "confidential" : "general",
       ...(file ? { fileName: file.name } : {}),
     });
     addCase(record);

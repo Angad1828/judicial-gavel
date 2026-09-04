@@ -1,11 +1,26 @@
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Scale, FileText, Clock, Users, ChevronRight, Lock, Menu } from "lucide-react";
-import { useCases } from "@/lib/case-store";
-import { STATUS_TONE, type CaseRecord } from "@/data/cases";
+import { Search, Scale, FileText, Clock, Users, ChevronRight, Lock } from "lucide-react";
+import { useCaseActions, useCases } from "@/lib/case-store";
+import {
+  CLASSIFICATION_LABEL,
+  CLASSIFICATION_OPTIONS,
+  STATUS_OPTIONS,
+  STATUS_TONE,
+  caseSearchText,
+  isConfidential,
+  type CaseClassification,
+  type CaseRecord,
+  type CaseStatus,
+} from "@/data/cases";
 import { LegalEyeMark } from "@/components/brand/LegalEyeMark";
+import { UserProfileMenu } from "@/components/layout/UserProfileMenu";
+import { getSession } from "@/lib/user-store";
 
 export const Route = createFileRoute("/records")({
+  beforeLoad: () => {
+    if (!getSession()) throw redirect({ to: "/" });
+  },
   validateSearch: (search: Record<string, unknown>) => {
     const caseId = search["case"];
     return { case: typeof caseId === "string" && caseId.trim() ? caseId : undefined };
@@ -42,6 +57,8 @@ function Records() {
   const records = useCases();
 
   const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<CaseStatus | "All">("All");
+  const [classFilter, setClassFilter] = useState<CaseClassification | "All">("All");
   const [selectedId, setSelectedId] = useState<string | undefined>(() => {
     const first = records[0];
     if (!first) return undefined;
@@ -56,13 +73,13 @@ function Records() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return records;
-    return records.filter((c) =>
-      [c.id, c.title, c.court, c.subject, ...c.parties.map((p) => p.name)].some((f) =>
-        f.toLowerCase().includes(q),
-      ),
-    );
-  }, [query, records]);
+    return records.filter((c) => {
+      if (q && !caseSearchText(c).includes(q)) return false;
+      if (statusFilter !== "All" && c.status !== statusFilter) return false;
+      if (classFilter !== "All" && c.classification !== classFilter) return false;
+      return true;
+    });
+  }, [query, records, statusFilter, classFilter]);
 
   const selected = selectedId ? records.find((c) => c.id === selectedId) : undefined;
 
@@ -100,13 +117,6 @@ function Records() {
             })}
           </nav>
           <div className="ml-auto flex items-center gap-3">
-            <Link
-              to="/dashboard"
-              aria-label="Open the lawyer's dashboard"
-              className="focus-legal hidden h-8 w-8 items-center justify-center border border-border text-muted-foreground transition-colors hover:border-brass-dim hover:text-parchment sm:flex"
-            >
-              <Menu className="h-3.5 w-3.5" />
-            </Link>
             <div className="relative hidden sm:block">
               <Search className="pointer-events-none absolute left-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -117,13 +127,7 @@ function Records() {
                 className="focus-legal w-56 border-b border-input bg-transparent py-1.5 pl-6 text-xs outline-none transition-colors placeholder:text-muted-foreground/70 hover:border-brass-dim focus:border-brass lg:w-72"
               />
             </div>
-            <Link
-              to="/dashboard"
-              className="focus-legal flex h-8 w-8 items-center justify-center border border-border font-display text-xs text-brass"
-              aria-label="Return to the dashboard"
-            >
-              SI
-            </Link>
+            <UserProfileMenu showName={false} />
           </div>
         </div>
       </header>
@@ -136,6 +140,48 @@ function Records() {
             <span className="label-legal">{filtered.length} matters</span>
           </div>
           <div className="mt-5 h-px w-full rule-brass" />
+
+          {/* Lifecycle + classification filters */}
+          <div className="mt-5 space-y-2.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="label-legal mr-1">Status</span>
+              {(["All", ...STATUS_OPTIONS] as Array<CaseStatus | "All">).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setStatusFilter(s)}
+                  aria-pressed={statusFilter === s}
+                  className={`focus-legal border px-2 py-1 font-mono text-[10px] tracking-[0.12em] uppercase transition-colors ${
+                    statusFilter === s
+                      ? "border-brass/60 bg-brass/10 text-brass"
+                      : "border-border text-muted-foreground hover:border-brass-dim hover:text-parchment"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="label-legal mr-1">Classification</span>
+              {(["All", ...CLASSIFICATION_OPTIONS] as Array<CaseClassification | "All">).map((cls) => (
+                <button
+                  key={cls}
+                  type="button"
+                  onClick={() => setClassFilter(cls)}
+                  aria-pressed={classFilter === cls}
+                  className={`focus-legal border px-2 py-1 font-mono text-[10px] tracking-[0.12em] uppercase transition-colors ${
+                    classFilter === cls
+                      ? cls === "confidential"
+                        ? "border-burgundy/60 bg-burgundy/[0.08] text-burgundy"
+                        : "border-brass/60 bg-brass/10 text-brass"
+                      : "border-border text-muted-foreground hover:border-brass-dim hover:text-parchment"
+                  }`}
+                >
+                  {cls === "All" ? "All" : CLASSIFICATION_LABEL[cls]}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {records.length === 0 ? (
             <div className="mt-5 border border-dashed border-border px-5 py-12 text-center">
@@ -158,7 +204,7 @@ function Records() {
                       aria-current={active ? "true" : undefined}
                       className={`focus-legal group block w-full border-l-2 px-4 py-4 text-left transition-colors ${
                         active
-                          ? c.confidential
+                          ? isConfidential(c)
                             ? "border-burgundy bg-surface"
                             : "border-brass bg-surface"
                           : "border-transparent hover:border-brass-dim hover:bg-surface/60"
@@ -166,7 +212,7 @@ function Records() {
                     >
                       <div className="flex items-center justify-between gap-3">
                         <span className="flex items-center gap-1.5">
-                          {c.confidential && (
+                          {isConfidential(c) && (
                             <Lock className="h-3 w-3 shrink-0 text-burgundy" aria-label="Confidential matter" />
                           )}
                           <span className="font-mono text-[10px] tracking-[0.14em] text-brass-dim">{c.id}</span>
@@ -204,6 +250,8 @@ function Records() {
 }
 
 function CaseFile({ record }: { record: CaseRecord }) {
+  const { updateCase } = useCaseActions();
+
   return (
     <section key={record.id} className="animate-rise-in space-y-10" aria-label="Case file">
       <header className="chamber-panel grain p-8">
@@ -211,7 +259,7 @@ function CaseFile({ record }: { record: CaseRecord }) {
           <span className="font-mono text-[11px] tracking-[0.16em] text-brass">{record.id}</span>
           <span className="h-3 w-px bg-border" />
           <span className="label-legal">{record.subject}</span>
-          {record.confidential && (
+          {isConfidential(record) && (
             <span className="seal-confidential ml-auto">
               <Lock className="h-3 w-3" />
               Confidential
@@ -223,17 +271,59 @@ function CaseFile({ record }: { record: CaseRecord }) {
         </h2>
         <div className="mt-7 h-px w-full rule-brass" />
         <dl className="mt-7 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
-          {[
-            ["Court", record.court],
-            ["Bench", record.bench],
-            ["Filed", record.filed],
-            ["Status", record.status],
-          ].map(([label, value]) => (
+          {(
+            [
+              ["Court", record.court],
+              ["Bench", record.bench],
+              ["Filed", record.filed],
+              ...(record.cnr ? [["CNR", record.cnr] as const] : []),
+              ...(record.firNo ? [["FIR No.", record.firNo] as const] : []),
+              ...(record.policeStation ? [["Police Station", record.policeStation] as const] : []),
+            ] as Array<[string, string]>
+          ).map(([label, value]) => (
             <div key={label}>
               <dt className="label-legal">{label}</dt>
               <dd className="mt-2 text-sm text-parchment">{value}</dd>
             </div>
           ))}
+
+          {/* Confidentiality classification — editable */}
+          <div>
+            <dt className="label-legal">Classification</dt>
+            <dd className="mt-2">
+              <select
+                value={record.classification}
+                onChange={(e) => updateCase(record.id, { classification: e.target.value as CaseClassification })}
+                aria-label={`Classification of ${record.id}`}
+                className="focus-legal w-full cursor-pointer border-b border-input bg-transparent pb-1.5 text-sm text-parchment outline-none transition-colors [color-scheme:dark] hover:border-brass-dim focus:border-brass"
+              >
+                {CLASSIFICATION_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {CLASSIFICATION_LABEL[option]}
+                  </option>
+                ))}
+              </select>
+            </dd>
+          </div>
+
+          {/* Lifecycle status — editable */}
+          <div>
+            <dt className="label-legal">Status</dt>
+            <dd className="mt-2">
+              <select
+                value={record.status}
+                onChange={(e) => updateCase(record.id, { status: e.target.value as CaseStatus })}
+                aria-label={`Lifecycle status of ${record.id}`}
+                className="focus-legal w-full cursor-pointer border-b border-input bg-transparent pb-1.5 text-sm text-parchment outline-none transition-colors [color-scheme:dark] hover:border-brass-dim focus:border-brass"
+              >
+                {STATUS_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </dd>
+          </div>
         </dl>
       </header>
 

@@ -3,25 +3,44 @@
  *
  * Seeded with the sample archive; matters created in the app are kept in
  * localStorage so the prototype behaves like a real product without
- * implying a backend. Every read goes through this module, so swapping in a
- * real API later means replacing `load`/`persist` only.
+ * implying a backend. Edits made to seeded matters (status, classification,
+ * pinning, …) are stored as overrides so they survive a reload. Every read
+ * goes through this module, so swapping in a real API later means replacing
+ * `load`/`persist` only.
  */
 
 import { useCallback, useSyncExternalStore } from "react";
-import { CASES, type CaseRecord } from "@/data/cases";
+import { CASES, type CaseClassification, type CaseRecord } from "@/data/cases";
 
 const STORAGE_KEY = "legal-eye.cases.v1";
 
 let cache: CaseRecord[] | null = null;
 const listeners = new Set<() => void>();
 
+const seededById = new Map(CASES.map((c) => [c.id, c]));
+
+/**
+ * Older localStorage payloads predate `classification` (they used a
+ * `confidential` boolean) — migrate them in place on load.
+ */
+function normalize(record: CaseRecord): CaseRecord {
+  const legacy = record as CaseRecord & { confidential?: boolean };
+  const { classification, confidential, ...rest } = legacy;
+  return {
+    ...rest,
+    classification: classification ?? (confidential ? "confidential" : "general"),
+  };
+}
+
 function load(): CaseRecord[] {
   if (cache) return cache;
   if (typeof window === "undefined") return CASES;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    const added = raw ? (JSON.parse(raw) as CaseRecord[]) : [];
-    cache = [...added, ...CASES];
+    const stored = raw ? (JSON.parse(raw) as CaseRecord[]) : [];
+    const added = stored.filter((c) => !seededById.has(c.id)).map(normalize);
+    const overrides = new Map(stored.filter((c) => seededById.has(c.id)).map((c) => [c.id, normalize(c)]));
+    cache = [...added, ...CASES.map((c) => overrides.get(c.id) ?? c)];
   } catch {
     cache = CASES;
   }
@@ -31,12 +50,15 @@ function load(): CaseRecord[] {
 function persist(next: CaseRecord[]) {
   cache = next;
   if (typeof window !== "undefined") {
-    const seeded = new Set(CASES.map((c) => c.id));
+    // Store in-app additions plus any seeded matter that has diverged from its
+    // seed — enough to persist edits without duplicating the whole archive.
+    const stored = next.filter((c) => {
+      const seed = seededById.get(c.id);
+      if (!seed) return true;
+      return JSON.stringify(c) !== JSON.stringify(seed);
+    });
     try {
-      window.localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(next.filter((c) => !seeded.has(c.id))),
-      );
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
     } catch {
       /* storage unavailable — session-only */
     }
@@ -50,11 +72,7 @@ function subscribe(listener: () => void) {
 }
 
 export function useCases(): CaseRecord[] {
-  return useSyncExternalStore(
-    subscribe,
-    load,
-    () => CASES,
-  );
+  return useSyncExternalStore(subscribe, load, () => CASES);
 }
 
 export function useCaseActions() {
@@ -66,7 +84,12 @@ export function useCaseActions() {
     persist(load().map((c) => (c.id === id ? { ...c, pinned: !c.pinned } : c)));
   }, []);
 
-  return { addCase, togglePinned };
+  /** Single source of truth for edits — every UI reads from the same store. */
+  const updateCase = useCallback((id: string, patch: Partial<CaseRecord>) => {
+    persist(load().map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  }, []);
+
+  return { addCase, togglePinned, updateCase };
 }
 
 export interface NewCaseInput {
@@ -75,12 +98,12 @@ export interface NewCaseInput {
   court: string;
   bench: string;
   status: CaseRecord["status"];
+  classification: CaseClassification;
   filed: string;
   subject: string;
   petitioner: string;
   respondent: string;
   summary: string;
-  confidential: boolean;
   fileName?: string;
 }
 
@@ -91,10 +114,10 @@ export function toCaseRecord(input: NewCaseInput): CaseRecord {
     court: input.court.trim(),
     bench: input.bench.trim() || "To be assigned",
     status: input.status,
+    classification: input.classification,
     filed: input.filed.trim() || "Not recorded",
     updated: "just now",
     subject: input.subject.trim() || "General",
-    confidential: input.confidential,
     parties: [
       { role: "Petitioner", name: input.petitioner.trim() || "Not recorded" },
       { role: "Respondent", name: input.respondent.trim() || "Not recorded" },
@@ -110,7 +133,4 @@ export function toCaseRecord(input: NewCaseInput): CaseRecord {
     issues: [],
     authorities: [],
   };
-}
-
-/** Placeholder identity until an authentication service exists. */
-export const CURRENT_USER = { name: "S. Iyer", initials: "SI" };
+}

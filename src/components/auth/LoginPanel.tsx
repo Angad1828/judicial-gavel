@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import courtroom from "@/assets/courtroom.jpg";
 import { LegalEyeMark } from "@/components/brand/LegalEyeMark";
+import { DEFAULT_USER, signIn } from "@/lib/user-store";
 
 export function LoginPanel() {
   const navigate = useNavigate();
@@ -11,8 +12,13 @@ export function LoginPanel() {
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // Prototype only: no authentication service exists in this project.
+    // Prototype only: no authentication service exists in this project. The
+    // session is recorded locally so sign-out can clear it; a real auth
+    // service replaces signIn()/signOut() in src/lib/user-store.ts.
     setPending(true);
+    const form = new FormData(event.currentTarget);
+    const email = String(form.get("email") ?? "").trim();
+    signIn({ email: email || DEFAULT_USER.email });
     window.setTimeout(() => navigate({ to: "/dashboard" }), 650);
   }
 

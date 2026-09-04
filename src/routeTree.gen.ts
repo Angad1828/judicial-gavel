@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RecordsRouteImport } from './routes/records'
 import { Route as UploadRouteImport } from './routes/upload'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecordsRoute = RecordsRouteImport.update({
@@ -38,12 +44,14 @@ const UploadRoute = UploadRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
   '/upload': typeof UploadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
   '/upload': typeof UploadRoute
 }
@@ -51,20 +59,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
   '/upload': typeof UploadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/records' | '/upload'
+  fullPaths: '/' | '/dashboard' | '/profile' | '/records' | '/upload'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/records' | '/upload'
-  id: '__root__' | '/' | '/dashboard' | '/records' | '/upload'
+  to: '/' | '/dashboard' | '/profile' | '/records' | '/upload'
+  id: '__root__' | '/' | '/dashboard' | '/profile' | '/records' | '/upload'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  ProfileRoute: typeof ProfileRoute
   RecordsRoute: typeof RecordsRoute
   UploadRoute: typeof UploadRoute
 }
@@ -83,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/records': {
@@ -105,6 +122,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  ProfileRoute: ProfileRoute,
   RecordsRoute: RecordsRoute,
   UploadRoute: UploadRoute,
 }

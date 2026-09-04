@@ -1,9 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { CinematicIntro } from "@/components/intro/CinematicIntro";
 import { LoginPanel } from "@/components/auth/LoginPanel";
+import { getSession } from "@/lib/user-store";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: () => {
+    // A returning session goes straight to the archive; the cinematic intro
+    // plays for visitors who are not yet signed in.
+    if (getSession()) throw redirect({ to: "/dashboard" });
+  },
   head: () => ({
     meta: [
       { title: "Legal Eye — Legal Records & Case Intelligence" },
@@ -26,11 +32,19 @@ export const Route = createFileRoute("/")({
 });
 
 function Entry() {
+  const navigate = useNavigate();
   const [introDone, setIntroDone] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   // The intro is a client-side cinematic; skip it during SSR/prerender.
   useEffect(() => setMounted(true), []);
+
+  // SSR cannot read the localStorage session, so a signed-in user who lands
+  // here through a server redirect or hard refresh is sent on to the archive
+  // once the client is live. beforeLoad covers in-app navigation.
+  useEffect(() => {
+    if (getSession()) navigate({ to: "/dashboard" });
+  }, [navigate]);
 
   return (
     <>

@@ -14,8 +14,8 @@ export function CaseStats({ cases }: CaseStatsProps) {
       total: cases.length,
       open: open.length,
       reserved: open.filter((c) => c.status === "Reserved").length,
-      confidential: open.filter((c) => c.confidential).length,
-      archived: cases.filter((c) => c.archived).length,
+      confidential: open.filter((c) => c.classification === "confidential").length,
+      archived: cases.filter((c) => c.archived || c.status === "Disposed").length,
     };
   }, [cases]);
 
