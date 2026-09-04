@@ -13,7 +13,7 @@ export function LoginPanel() {
     event.preventDefault();
     // Prototype only: no authentication service exists in this project.
     setPending(true);
-    window.setTimeout(() => navigate({ to: "/records" }), 650);
+    window.setTimeout(() => navigate({ to: "/dashboard" }), 650);
   }
 
   return (

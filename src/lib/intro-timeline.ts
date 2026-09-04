@@ -1,42 +1,62 @@
 /**
  * Master choreography for the LEGAL EYE opening sequence.
  *
- * These beats restore the ORIGINAL startup timeline: black screen → gavel
- * appears raised and settles → wind-up → two strikes inside one continuous
- * CSS keyframe → wordmark born from the second impact → gavel recedes →
- * brand settles → handoff. Every number is a millisecond offset from
- * sequence start so CSS, React state and the impact sound share one clock.
+ * The gavel + sound block play the startup choreography from the reference
+ * demo: the scene fades in already raised, settles into a striking stance,
+ * then runs ONE uninterrupted double-strike animation (~1.75s) whose two
+ * contact frames are at 34% and 70% of the run. Every number is a
+ * millisecond offset from sequence start, so CSS, React state and the
+ * impact sounds share one clock.
+ *
+ *   0.0–0.2    darkness; courtroom haze begins bleeding out of the black
+ *   0.9–1.15   gavel + sound block fade in, raised (+8deg)
+ *   1.15–1.45  the gavel settles into its striking stance (5.5deg)
+ *   1.45–3.2   DOUBLE STRIKE (one 1.75s run): wind-up → STRIKE 1 (≈2.045s)
+ *              → lift → STRIKE 2 (≈2.675s) → settle. The two thud sounds
+ *              are NOT timer beats — the component reads the CSS animation's
+ *              own clock and fires each knock at (impact − speaker lead),
+ *              so audio is frame-locked to the visuals.
+ *   3.4        the gavel scene recedes, leaving the stage clear
+ *   3.9        LEGAL EYE wordmark reveals at the centre
+ *   5.2        courtroom dims, brand holds
+ *   6.2        intro hands over to the application
  */
 
 export const TIMELINE = {
   /** courtroom haze begins bleeding out of darkness */
   hazeIn: 200,
-  /** gavel appears raised and settles into its striking stance */
+  /** the gavel + sound block scene fades in, already raised */
   gavelIn: 900,
-  /** first impact (inside the continuous strike animation) */
-  strikeOne: 2050,
-  /** second, more decisive impact */
-  strikeTwo: 2680,
-  /** wordmark pops in, tied to strike two */
-  brandIn: 2760,
-  /** gavel recedes, brand rests alone */
-  settle: 3400,
+  /** the gavel settles from raised into its striking stance */
+  gavelReady: 1150,
+  /** the uninterrupted double-strike animation begins (1.75s run) */
+  strikeStart: 1450,
+  /** the scene recedes, well before the wordmark takes centre stage */
+  gavelExit: 3400,
+  /** LEGAL EYE wordmark reveals at the centre */
+  brandIn: 3900,
+  /** courtroom recedes, brand settles */
+  settle: 5200,
   /** intro hands over to the application shell */
-  handoff: 5000,
+  handoff: 6200,
 } as const;
 
 export type IntroPhase =
   | "dark"
   | "haze"
   | "gavel"
-  | "strike-one"
-  | "strike-two"
+  | "ready"
+  | "strike"
+  | "exit"
   | "brand"
   | "settle"
   | "done";
 
-/** The gavel's single continuous strike animation: starts at gavelIn, ends as it recedes. */
-export const GAVEL_ANIM_MS = 2800;
-/** Impact points as fractions of GAVEL_ANIM_MS — keep in sync with @keyframes gavel-strike. */
-export const IMPACT_ONE_FRACTION = (TIMELINE.strikeOne - TIMELINE.gavelIn) / GAVEL_ANIM_MS;
-export const IMPACT_TWO_FRACTION = (TIMELINE.strikeTwo - TIMELINE.gavelIn) / GAVEL_ANIM_MS;
+/** Gavel-scene pose driven by the timeline above. */
+export type GavelPose = "hidden" | "appear" | "ready" | "strike" | "exit";
+
+/** Duration of the CSS double-strike keyframes — keep in sync with @keyframes gavel-double-strike. */
+export const STRIKE_DURATION_MS = 1750;
+/** Impact offsets inside the strike run — keep in sync with the keyframes (34% / 70%). */
+export const STRIKE_IMPACT_1_MS = 595;
+export const STRIKE_IMPACT_2_MS = 1225;

@@ -447,441 +447,281 @@
 
 
 /* ============================================================
-   ============================================================
-   RESTORED GAVEL CHOREOGRAPHY
-   ============================================================
+   GAVEL + SOUND BLOCK SCENE
    ============================================================
 
-   IMPORTANT VISUAL DECISION
-   -------------------------
+   Ported from the reference startup prototype: the gavel and its
+   sound block sit inside a 1536x1024 canvas box (the gavel image
+   fills the box; the block is a separate layer planted beneath the
+   gavel head at measured geometry).
 
-   The source gavel.png is naturally diagonal:
+     --block-left    3.71%   of the box width
+     --block-top    65.33%   of the box height
+     --block-width  60%
 
-          HANDLE
-             /
-            /
-           /
-       HEAD
+   The gavel rotates about the handle-end pivot (95.05% / 75.4% of
+   the box) so the head arcs down onto the block's brass plate.
 
-   The image itself is therefore corrected with a fixed
-   +40deg rotation so that the RESTING visual orientation
-   becomes:
+   Poses (data-gp):
+     appear -> fades in already raised (+8deg)
+     ready  -> settles 8deg to 5.5deg
+     strike -> ONE uninterrupted 1.75s double-strike run; contact at
+               34% (~0.595s) and 70% (~1.225s). The impact blooms and
+               the block's recoil are frame-locked to those frames.
+     exit   -> holds -2deg and recedes
 
-       HEAD ───────────────── HANDLE
-        LEFT                     RIGHT
-
-   The actual strike is then controlled by the parent
-   wrapper.
-
-   This prevents the previous problem where:
-   
-       source-image rotation
-                 +
-       animation rotation
-
-   combined into an exaggerated diagonal swinging motion.
-
-   The gavel now behaves primarily as a controlled vertical
-   courtroom striking motion.
-
-   TIMING:
-   ------------------------------------------------------------
-   Gavel animation starts at 900ms.
-   First impact = 2050ms.
-   Second impact = 2680ms.
-
-   Since GAVEL_ANIM_MS = 2800ms:
-
-   First impact:
-   (2050 - 900) / 2800 = 41.07%
-
-   Second impact:
-   (2680 - 900) / 2800 = 63.57%
-
-   DO NOT CHANGE THESE TWO PERCENTAGES without also
-   changing intro-timeline.ts.
+   TIMING: the strike run starts at 1450ms, so contacts land around
+   2045ms and 2675ms - keep in sync with intro-timeline.ts.
    ============================================================ */
 
-
-/* ------------------------------------------------------------
-   GAVEL MOVEMENT
-   ------------------------------------------------------------ */
-
-@keyframes gavel-strike {
-
-  /*
-   * ----------------------------------------------------------
-   * 0%
-   * Initial controlled position.
-   *
-   * The gavel is horizontally readable.
-   * Head = LEFT
-   * Handle = RIGHT
-   * ----------------------------------------------------------
-   */
-  0% {
-    transform:
-      translate3d(0, 0, 0)
-      rotate(0deg);
-
-    animation-timing-function:
-      cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-
-  /*
-   * ----------------------------------------------------------
-   * 12%
-   * Small settling motion.
-   * ----------------------------------------------------------
-   */
-  12% {
-    transform:
-      translate3d(0, 0, 0)
-      rotate(0deg);
-
-    animation-timing-function:
-      cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-
-  /*
-   * ----------------------------------------------------------
-   * 23%
-   * FIRST WIND-UP
-   *
-   * The entire gavel rises slightly.
-   *
-   * Very small positive rotation:
-   * the head lifts naturally while the handle remains
-   * toward the right.
-   *
-   * No spinning.
-   * ----------------------------------------------------------
-   */
-  23% {
-    transform:
-      translate3d(0, -42px, 0)
-      rotate(7deg);
-
-    animation-timing-function:
-      cubic-bezier(0.45, 0, 0.8, 0.35);
-  }
-
-
-  /*
-   * ----------------------------------------------------------
-   * 32%
-   * ANTICIPATION
-   *
-   * Brief hold before the strike.
-   * ----------------------------------------------------------
-   */
-  32% {
-    transform:
-      translate3d(0, -43px, 0)
-      rotate(7deg);
-
-    animation-timing-function:
-      cubic-bezier(0.12, 0.75, 0.25, 1);
-  }
-
-
-  /*
-   * ----------------------------------------------------------
-   * 41.07%
-   *
-   * EXACT FIRST IMPACT
-   *
-   * This MUST remain synchronized with:
-   *
-   * TIMELINE.strikeOne
-   *
-   * in intro-timeline.ts.
-   * ----------------------------------------------------------
-   */
-  41.07% {
-    transform:
-      translate3d(0, 7px, 0)
-      rotate(-5deg);
-
-    animation-timing-function:
-      cubic-bezier(0.12, 0.72, 0.2, 1);
-  }
-
-
-  /*
-   * ----------------------------------------------------------
-   * 45%
-   * FIRST REBOUND
-   *
-   * Much smaller than the strike.
-   * ----------------------------------------------------------
-   */
-  45% {
-    transform:
-      translate3d(0, -9px, 0)
-      rotate(2deg);
-
-    animation-timing-function:
-      cubic-bezier(0.3, 0.7, 0.4, 1);
-  }
-
-
-  /*
-   * ----------------------------------------------------------
-   * 50%
-   * RESET
-   * ----------------------------------------------------------
-   */
-  50% {
-    transform:
-      translate3d(0, 0, 0)
-      rotate(0deg);
-
-    animation-timing-function:
-      cubic-bezier(0.45, 0, 0.2, 1);
-  }
-
-
-  /*
-   * ----------------------------------------------------------
-   * 55%
-   * SECOND WIND-UP
-   *
-   * Slightly stronger than strike one.
-   * ----------------------------------------------------------
-   */
-  55% {
-    transform:
-      translate3d(0, -48px, 0)
-      rotate(8deg);
-
-    animation-timing-function:
-      cubic-bezier(0.45, 0, 0.82, 0.32);
-  }
-
-
-  /*
-   * ----------------------------------------------------------
-   * 59%
-   * SECOND ANTICIPATION
-   * ----------------------------------------------------------
-   */
-  59% {
-    transform:
-      translate3d(0, -48px, 0)
-      rotate(8deg);
-
-    animation-timing-function:
-      cubic-bezier(0.12, 0.75, 0.25, 1);
-  }
-
-
-  /*
-   * ----------------------------------------------------------
-   * 63.57%
-   *
-   * EXACT SECOND IMPACT
-   *
-   * This MUST remain synchronized with:
-   *
-   * TIMELINE.strikeTwo
-   * ----------------------------------------------------------
-   */
-  63.57% {
-    transform:
-      translate3d(0, 8px, 0)
-      rotate(-5deg);
-
-    animation-timing-function:
-      cubic-bezier(0.1, 0.72, 0.2, 1);
-  }
-
-
-  /*
-   * ----------------------------------------------------------
-   * 68%
-   * SECOND REBOUND
-   * ----------------------------------------------------------
-   */
-  68% {
-    transform:
-      translate3d(0, -8px, 0)
-      rotate(2deg);
-
-    animation-timing-function:
-      cubic-bezier(0.3, 0.7, 0.4, 1);
-  }
-
-
-  /*
-   * ----------------------------------------------------------
-   * 75%
-   * SETTLE
-   * ----------------------------------------------------------
-   */
-  75% {
-    transform:
-      translate3d(0, 0, 0)
-      rotate(0deg);
-
-    animation-timing-function:
-      cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-
-  /*
-   * ----------------------------------------------------------
-   * 82%
-   * Final resting position.
-   * ----------------------------------------------------------
-   */
-  82% {
-    transform:
-      translate3d(0, 0, 0)
-      rotate(0deg);
-  }
-
-
-  100% {
-    transform:
-      translate3d(0, 0, 0)
-      rotate(0deg);
-  }
-}
-
-
-/* ============================================================
-   GAVEL IMAGE ORIENTATION
-   ============================================================
-
-   The actual supplied PNG is diagonal.
-
-   We rotate the IMAGE ONCE by +40deg.
-
-   This transforms the original:
-
-          /
-         /
-        /
-
-   into approximately:
-
-   ─────────────────
-
-   with the hammer head on the LEFT and handle on the RIGHT.
-
-   The parent animation above handles the actual slam.
-
-   This separation is extremely important.
-   ============================================================ */
-
-img[width="1024"][height="1024"] {
-  transform:
-    rotate(40deg)
-    scale(0.96);
-
-  transform-origin: center center;
-
-  will-change: transform;
-
-  /*
-   * Keep the source image visually crisp.
-   */
-  backface-visibility: hidden;
-}
-
-
-/* ============================================================
-   GAVEL STAGE POSITIONING
-   ============================================================
-
-   The actual stage is created by CinematicIntro.tsx using:
-
-   w-[min(78vw,640px)]
-   aspect-[4/3]
-
-   We intentionally keep the stage lower than the center
-   branding zone.
-
-   This means the gavel remains prominent without occupying
-   the exact center where LEGAL EYE appears.
-   ============================================================ */
-
-.relative.aspect-\[4\/3\] {
-  position: relative;
-
-  /*
-   * Prevent transformed gavel pixels from unexpectedly
-   * affecting the layout.
-   */
-  isolation: isolate;
-}
-
-
-/* ============================================================
-   GAVEL DROP SHADOW
-   ============================================================ */
-
-img[width="1024"][height="1024"] {
-  filter:
-    drop-shadow(
-      0 28px 34px rgba(0, 0, 0, 0.48)
-    );
-
+.le-gavel-scene {
+  --block-left: 3.71%;
+  --block-top: 65.33%;
+  --block-width: 60%;
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(720px, 72vw, 96vh);
+  aspect-ratio: 1536 / 1024;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
   user-select: none;
+  will-change: transform, opacity;
+  z-index: 10;
+}
+
+.le-gavel-scene img {
+  display: block;
   -webkit-user-drag: none;
 }
 
-
-/* ============================================================
-   SOUND BLOCK
-   ============================================================ */
-
-@keyframes block-recoil {
-
-  0% {
-    transform:
-      translate3d(0, 0, 0)
-      scaleY(1);
-  }
-
-  8% {
-    transform:
-      translate3d(0, 3px, 0)
-      scaleY(0.975);
-  }
-
-  18% {
-    transform:
-      translate3d(0, 1px, 0)
-      scaleY(0.99);
-  }
-
-  38% {
-    transform:
-      translate3d(0, 0, 0)
-      scaleY(1);
-  }
-
-  100% {
-    transform:
-      translate3d(0, 0, 0)
-      scaleY(1);
-  }
-}
-
-
-/* ============================================================
-   IMPACT LIGHT
-   ============================================================ */
-
-.gavel-impact-light {
+/* Warm pool of light grounding the scene */
+.le-scene-glow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1%;
+  height: 26%;
+  background: radial-gradient(
+    ellipse 46% 62% at 32% 0%,
+    color-mix(in srgb, #e0a84f 20%, transparent),
+    transparent 72%
+  );
   pointer-events: none;
 }
 
+/* Sound block - the planted layer; only recoils at impact */
+.le-block-wrap {
+  position: absolute;
+  left: var(--block-left);
+  top: var(--block-top);
+  width: var(--block-width);
+  will-change: transform;
+}
 
+.le-block {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Restrained golden bloom at the strike point (the block's plate) */
+.le-impact-glow {
+  position: absolute;
+  left: 32%;
+  top: 72%;
+  width: 30%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) scale(0.2);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, #ffd682 80%, transparent) 0%,
+    color-mix(in srgb, #e0a84f 36%, transparent) 38%,
+    transparent 72%
+  );
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.le-gavel-scene[data-gp='strike'] .le-impact-glow-1 {
+  animation: impact-burst 0.55s ease-out 0.595s forwards;
+}
+
+.le-gavel-scene[data-gp='strike'] .le-impact-glow-2 {
+  animation: impact-burst 0.55s ease-out 1.225s forwards;
+}
+
+@keyframes impact-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  20% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.75;
+    transform: translate(-50%, -50%) scale(1.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.5);
+  }
+}
+
+/* The gavel pivots at the handle end */
+.le-gavel-rot {
+  position: absolute;
+  inset: 0;
+  /* Pivot ≈ handle knob: 1460/1536 of the width, 772/1024 of the height. */
+  transform-origin: 95.05% 75.4%;
+  will-change: transform;
+}
+
+.le-gavel-rot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Each pose lands where the next begins, so the gavel never snaps */
+.le-gavel-scene[data-gp='appear'] .le-gavel-rot {
+  transform: rotate(8deg);
+}
+
+.le-gavel-scene[data-gp='exit'] .le-gavel-rot {
+  transform: rotate(-2deg);
+}
+
+.le-gavel-scene[data-gp='appear'] {
+  animation: scene-appear 0.3s ease-out forwards;
+}
+
+@keyframes scene-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.le-gavel-scene[data-gp='ready'],
+.le-gavel-scene[data-gp='strike'],
+.le-gavel-scene[data-gp='exit'] {
+  opacity: 1;
+}
+
+.le-gavel-scene[data-gp='ready'] .le-gavel-rot {
+  animation: gavel-ready 0.3s cubic-bezier(0.22, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes gavel-ready {
+  from {
+    transform: rotate(8deg);
+  }
+  to {
+    transform: rotate(5.5deg);
+  }
+}
+
+/* The judge strikes twice: wind-up, STRIKE 1 at 34%, lift for a bigger
+   second swing, STRIKE 2 at 70%, then rebound and settle. 1.75s total, so
+   with the strike starting at 1450ms the impacts land at ~2045ms and
+   ~2675ms. */
+.le-gavel-scene[data-gp='strike'] .le-gavel-rot {
+  animation: gavel-double-strike 1.75s forwards;
+}
+
+@keyframes gavel-double-strike {
+  0% {
+    transform: rotate(5.5deg);
+    animation-timing-function: ease-out;
+  }
+  18% {
+    transform: rotate(9deg);
+    animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  }
+  34% {
+    transform: rotate(-4deg) translateY(0.4%) scale(1, 0.985); /* STRIKE 1 */
+    animation-timing-function: ease-out;
+  }
+  41% {
+    transform: rotate(-1.2deg);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.3);
+  }
+  52% {
+    transform: rotate(9.5deg);
+    animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  }
+  70% {
+    transform: rotate(-4deg) translateY(0.4%) scale(1, 0.985); /* STRIKE 2 */
+    animation-timing-function: ease-out;
+  }
+  77% {
+    transform: rotate(-1deg);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.3);
+  }
+  88% {
+    transform: rotate(1deg);
+    animation-timing-function: ease-in-out;
+  }
+  100% {
+    transform: rotate(-2deg);
+  }
+}
+
+/* Tiny recoil of the block as the head lands - at both impact frames */
+.le-gavel-scene[data-gp='strike'] .le-block-wrap {
+  animation: block-recoil-double 1.75s forwards;
+}
+
+@keyframes block-recoil-double {
+  0%,
+  30% {
+    transform: translateY(0);
+  }
+  34% {
+    transform: translateY(0.7%);
+  }
+  38%,
+  66% {
+    transform: translateY(0);
+  }
+  70% {
+    transform: translateY(0.9%);
+  }
+  74%,
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* The scene recedes once the strikes are done */
+.le-gavel-scene[data-gp='exit'] {
+  animation: gavel-exit 0.3s ease-in forwards;
+}
+
+@keyframes gavel-exit {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(-1.2%) scale(0.95);
+  }
+}
+
+@media (max-width: 760px) {
+  .le-gavel-scene {
+    width: 94vw;
+  }
+}
 /* ============================================================
    CENTER BRAND PROTECTION
    ============================================================
@@ -1105,60 +945,6 @@ img[width="1024"][height="1024"] {
 
 
 /* ============================================================
-   RESPONSIVE GAVEL
-   ============================================================ */
-
-@media (max-width: 1100px) {
-
-  /*
-   * Keep the gavel prominent but reduce its visual footprint
-   * as the available horizontal space decreases.
-   */
-  img[width="1024"][height="1024"] {
-    transform:
-      rotate(40deg)
-      scale(0.9);
-  }
-}
-
-
-@media (max-width: 700px) {
-
-  /*
-   * On mobile, the gavel remains horizontal in its
-   * resting visual orientation but becomes more compact.
-   */
-  img[width="1024"][height="1024"] {
-    transform:
-      rotate(40deg)
-      scale(0.76);
-  }
-
-  /*
-   * Keep the center branding readable.
-   */
-  .absolute.inset-x-0.top-1\/2 {
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
-  }
-}
-
-
-/* ============================================================
-   VERY SMALL SCREENS
-   ============================================================ */
-
-@media (max-width: 420px) {
-
-  img[width="1024"][height="1024"] {
-    transform:
-      rotate(40deg)
-      scale(0.68);
-  }
-}
-
-
-/* ============================================================
    REDUCED MOTION
    ============================================================ */
 
@@ -1176,9 +962,4 @@ img[width="1024"][height="1024"] {
     scroll-behavior: auto !important;
   }
 
-  img[width="1024"][height="1024"] {
-    transform:
-      rotate(40deg)
-      scale(0.96) !important;
-  }
 }

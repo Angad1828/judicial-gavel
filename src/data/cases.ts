@@ -5,6 +5,21 @@
 
 export type CaseStatus = "Active" | "Reserved" | "Disposed" | "Appeal";
 
+/** Tailwind tones for the status label — shared by docket, cards and drawer. */
+export const STATUS_TONE: Record<CaseStatus, string> = {
+  Active: "text-olive border-olive/40",
+  Reserved: "text-brass border-brass/40",
+  Appeal: "text-parchment border-border",
+  Disposed: "text-muted-foreground border-border",
+};
+
+/** Statuses considered an open (not completed) matter. */
+export const OPEN_STATUSES: CaseStatus[] = ["Active", "Reserved", "Appeal"];
+
+export function isOpenMatter(record: Pick<CaseRecord, "archived" | "status">) {
+  return !record.archived && OPEN_STATUSES.includes(record.status);
+}
+
 export interface CaseParty {
   role: string;
   name: string;
@@ -152,7 +167,7 @@ export const CASES: CaseRecord[] = [
       "Testamentary proceeding resolved on consent terms recorded between the propounder and the caveator, with the estate divided by agreement rather than adjudication.",
     issues: ["Due execution and attestation of the 2019 will", "Effect of the consent terms on residual claims"],
     authorities: ["H. Venkatachala Iyengar v. B.N. Thimmajamma"],
-  },,
+  },
 {
     id: "ARB-2025-0031",
     title: "Sable Infra LLP v. Coastal Port Authority",
