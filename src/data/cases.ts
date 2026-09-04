@@ -47,6 +47,7 @@ export const CASES: CaseRecord[] = [
     status: "Active",
     filed: "12 Mar 2024",
     updated: "2 days ago",
+    pinned: true,
     subject: "Commercial · Recovery & Security Interest",
     parties: [
       { role: "Petitioner", name: "Marwah Textiles Pvt. Ltd." },
@@ -76,6 +77,8 @@ export const CASES: CaseRecord[] = [
     status: "Reserved",
     filed: "08 Sep 2023",
     updated: "6 days ago",
+    confidential: true,
+    pinned: true,
     subject: "Criminal · Documentary Evidence",
     parties: [
       { role: "Prosecution", name: "State of Karnataka" },
@@ -134,6 +137,7 @@ export const CASES: CaseRecord[] = [
     status: "Disposed",
     filed: "30 Apr 2024",
     updated: "5 weeks ago",
+    archived: true,
     subject: "Succession · Testamentary",
     parties: [
       { role: "Applicant", name: "R. Kaul" },
@@ -148,5 +152,74 @@ export const CASES: CaseRecord[] = [
       "Testamentary proceeding resolved on consent terms recorded between the propounder and the caveator, with the estate divided by agreement rather than adjudication.",
     issues: ["Due execution and attestation of the 2019 will", "Effect of the consent terms on residual claims"],
     authorities: ["H. Venkatachala Iyengar v. B.N. Thimmajamma"],
+  },,
+{
+    id: "ARB-2025-0031",
+    title: "Sable Infra LLP v. Coastal Port Authority",
+    court: "Arbitral Tribunal, Mumbai",
+    bench: "Three-member tribunal",
+    status: "Active",
+    filed: "09 Jan 2025",
+    updated: "yesterday",
+    subject: "Arbitration · Concession Agreement",
+    confidential: true,
+    parties: [
+      { role: "Claimant", name: "Sable Infra LLP" },
+      { role: "Respondent", name: "Coastal Port Authority" },
+      { role: "Counsel", name: "S. Iyer, Sr. Adv." },
+    ],
+    history: [
+      { date: "09 Jan 2025", title: "Statement of claim", note: "Termination of the concession disputed." },
+      { date: "26 Feb 2025", title: "Procedural order 1", note: "Confidentiality regime recorded by consent." },
+    ],
+    summary:
+      "A confidential arbitration over the termination of a port concession. The tribunal has recorded a confidentiality regime, so the record is restricted to counsel on file.",
+    issues: ["Whether termination followed the contractual cure procedure", "Quantification of the claimant's sunk cost"],
+    authorities: ["Associate Builders v. DDA"],
+  },
+  {
+    id: "TAX-2023-0774",
+    title: "Verma Exports v. Commissioner of Customs",
+    court: "CESTAT, Chennai",
+    bench: "Single Member",
+    status: "Disposed",
+    filed: "17 Feb 2023",
+    updated: "4 months ago",
+    subject: "Indirect Tax · Classification",
+    archived: true,
+    parties: [
+      { role: "Appellant", name: "Verma Exports" },
+      { role: "Respondent", name: "Commissioner of Customs" },
+    ],
+    history: [
+      { date: "17 Feb 2023", title: "Appeal filed", note: "Against the order-in-original on classification." },
+      { date: "05 Dec 2024", title: "Appeal allowed", note: "Classification restored to the declared heading." },
+    ],
+    summary:
+      "Classification dispute closed in the appellant's favour; retained in the archive as the reasoning governs later consignments.",
+    issues: ["Correct tariff heading for the imported assembly"],
+    authorities: ["Dunlop India v. Union of India"],
+  },
+  {
+    id: "IPR-2024-0250",
+    title: "Aureus Labs v. Kestrel Pharma",
+    court: "High Court of Bombay",
+    bench: "Single Judge (IP Division)",
+    status: "Active",
+    filed: "22 Aug 2024",
+    updated: "9 days ago",
+    subject: "Intellectual Property · Patent Infringement",
+    parties: [
+      { role: "Plaintiff", name: "Aureus Labs Pvt. Ltd." },
+      { role: "Defendant", name: "Kestrel Pharma Ltd." },
+    ],
+    history: [
+      { date: "22 Aug 2024", title: "Suit filed", note: "Interim injunction sought against the generic launch." },
+      { date: "30 Oct 2024", title: "Ad-interim order", note: "Defendant to maintain accounts pending hearing." },
+    ],
+    summary:
+      "Patent infringement suit concerning a generic formulation; the live question is the credibility of the invalidity challenge at the interim stage.",
+    issues: ["Prima facie validity of the suit patent", "Balance of convenience on a pre-launch injunction"],
+    authorities: ["F. Hoffmann-La Roche v. Cipla"],
   },
 ];
